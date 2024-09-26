@@ -38,10 +38,10 @@ const BookingPage = () => {
 
     const calculatePrice = (): number => {
         if (startDate && endDate && car) {
-            // Calculate the difference in days between start and end date
-            const diffInDays = dayjs(endDate).diff(dayjs(startDate), 'day');
+            // Calculate the difference in days between start and end date, inclusive of end date
+            const diffInDays = dayjs(endDate).diff(dayjs(startDate), 'day') + 1;
             // Calculate the total price
-            const totalPrice = (diffInDays + 1) * car.price; // Include the end date as a full day
+            const totalPrice = diffInDays * car.price;
             return totalPrice;
         }
         return 0;
@@ -79,8 +79,8 @@ const BookingPage = () => {
 
             try {
                 const data: RentInterface = {
-                    start_rent: startDate.toISOString(),
-                    end_rent: endDate.toISOString(),
+                    start_rent:  dayjs(startDate).endOf('day').toISOString(),
+                    end_rent: dayjs(endDate).endOf('day').toISOString(), // Ensure end date is inclusive
                     price: price,
                     car_id: car.ID,
                     user_id: userID,

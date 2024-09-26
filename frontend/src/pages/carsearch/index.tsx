@@ -3,6 +3,7 @@ import { Button, Row, Col, Typography } from "antd";
 import { useNavigate } from 'react-router-dom';
 import { GetCars } from "../../services/https";
 import { CarInterface } from "../../interfaces/ICar";
+import Loader from "../../components/third-patry/Loader"; // Import the Loader component
 
 const { Title, Text } = Typography;
 
@@ -61,6 +62,9 @@ const styles = {
   },
 };
 
+// Utility function to delay for a specific time
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 function CarSearch() {
   const [cars, setCars] = useState<CarInterface[]>([]);
   const [imagesByType, setImagesByType] = useState<Record<string, string[]>>({
@@ -78,11 +82,13 @@ function CarSearch() {
     'Van': null,
     'Motorcycle': null
   });
+  const [loading, setLoading] = useState(true); // New loading state
   const navigate = useNavigate();
 
   const getCars = async () => {
     try {
-      const res = await GetCars();
+      const [res] = await Promise.all([GetCars(), delay(1250)]); // Ensure at least 1.25 sec delay
+
       if (res.length > 0) {
         setCars(res);
         const groupedImages: Record<string, string[]> = {
@@ -106,6 +112,8 @@ function CarSearch() {
       }
     } catch (error) {
       console.error("Failed to fetch car data", error);
+    } finally {
+      setLoading(false); // Stop loading after fetching data and delay
     }
   };
 
@@ -146,6 +154,10 @@ function CarSearch() {
   const handleTypeClick = (type: string) => {
     navigate(`/rent/type/${type}`);
   };
+
+  if (loading) {
+    return <Loader />; // Display loader while data is loading
+  }
 
   return (
     <div style={styles.container}>

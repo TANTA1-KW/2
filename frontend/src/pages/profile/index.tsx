@@ -7,12 +7,62 @@ import dayjs from "dayjs";
 
 const { Title } = Typography;
 
+const styles = {
+  container: {
+    width: '80%',
+    margin: '0 auto',
+    padding: '20px',
+    backgroundColor: '#FFFFFF',
+    border: '2px solid #003366',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  title: {
+    fontSize: '24px',
+    color: '#003366',
+    fontFamily: 'Kanit, sans-serif',
+  },
+  inputStyle: {
+    fontSize: '16px',
+    borderRadius: '8px',
+    border: '1px solid #003366',
+  },
+  imageContainer: {
+    width: '150px',
+    height: '150px',
+    borderRadius: '50%',
+    border: '2px solid #003366',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '24px',
+    color: '#003366',
+  },
+  button: {
+    fontSize: '16px',
+    borderRadius: '8px',
+    backgroundColor: '#003366',
+    borderColor: '#003366',
+  },
+};
+
 function ProfilePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UsersInterface | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const myId = localStorage.getItem("id");
+
+  const handleEditProfile = () => {
+    if (myId) {
+      navigate(`/profile/edit/${myId}`);
+    } else {
+      messageApi.open({
+        type: "error",
+        content: "ไม่พบ ID ผู้ใช้",
+      });
+    }
+  };
 
   const getUserById = async (id: string) => {
     try {
@@ -24,9 +74,12 @@ function ProfilePage() {
           first_name: userData.first_name,
           last_name: userData.last_name,
           age: userData.age,
-          birthday: userData.birthday,
+          birthday: userData.birthday ? dayjs(userData.birthday).format("DD/MM/YYYY") : '',
           email: userData.email,
-          roles: userData.roles,
+          roles: userData.roles === 0 ? "Admin" : userData.roles === 1 ? "User" : "Employee",
+          gender: userData.gender_id === 1 ? 'Male' : 'Female',
+          phone: userData.phone,
+          address: userData.address,
         });
       } else {
         messageApi.open({
@@ -56,10 +109,10 @@ function ProfilePage() {
   }
 
   return (
-    <div style={{ fontFamily: 'Kanit, sans-serif', padding: '20px' }}>
+    <div style={styles.container}>
       {contextHolder}
       <Card>
-        <Title level={2} style={{ fontSize: '24px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ข้อมูลผู้ใช้</Title>
+        <Title level={2} style={styles.title}>ข้อมูลผู้ใช้</Title>
         <Divider />
         <Row justify="center" style={{ marginBottom: '20px' }}>
           <Col>
@@ -70,64 +123,55 @@ function ProfilePage() {
                 style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #003366' }}
               />
             ) : (
-              <div style={{ width: '150px', height: '150px', borderRadius: '50%', border: '2px solid #003366', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', color: '#003366' }}>
-                No Image
-              </div>
+              <div style={styles.imageContainer}>No Image</div>
             )}
           </Col>
         </Row>
-        <Form
-          form={form}
-          layout="vertical"
-          autoComplete="off"
-        >
+        <Form form={form} layout="vertical" autoComplete="off">
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ชื่อ</span>}
-                name="first_name"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="ชื่อ" name="first_name">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>นามสกุล</span>}
-                name="last_name"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="นามสกุล" name="last_name">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ตำแหน่ง</span>}
-                name="roles"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="ตำแหน่ง" name="roles">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>อายุ</span>}
-                name="age"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="เพศ" name="gender">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>วัน/เดือน/ปี เกิด</span>}
-                name="birthday"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="อายุ" name="age">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>อีเมล</span>}
-                name="email"
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} readOnly />
+              <Form.Item label="เบอร์โทรศัพท์" name="phone">
+                <Input style={styles.inputStyle} readOnly />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item label="ที่อยู่" name="address">
+                <Input style={styles.inputStyle} readOnly />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item label="วัน/เดือน/ปี เกิด" name="birthday">
+                <Input style={styles.inputStyle} readOnly />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item label="อีเมล" name="email">
+                <Input style={styles.inputStyle} readOnly />
               </Form.Item>
             </Col>
           </Row>
@@ -135,18 +179,21 @@ function ProfilePage() {
             <Col style={{ marginTop: "40px" }}>
               <Form.Item>
                 <Space>
-                  <Link to="/profile/edit">
-                    <Button
-                      type="primary"
-                      style={{
-                        fontSize: '16px',
-                        borderRadius: '8px',
-                        backgroundColor: '#003366',
-                        borderColor: '#003366'
-                      }}
-                    >
-                      แก้ไขข้อมูล
-                    </Button>
+                  <Button 
+                    type="primary" 
+                    onClick={handleEditProfile}
+                    style={{ backgroundColor: "#003366", borderColor: "#003366" }}
+                  >
+                    Edit
+                  </Button>
+                </Space>
+              </Form.Item>
+            </Col>
+            <Col style={{ marginTop: "40px", marginLeft: "20px" }}>
+              <Form.Item>
+                <Space>
+                  <Link to="/profile/leave">
+                    <Button type="primary" style={styles.button}>ลางาน</Button>
                   </Link>
                 </Space>
               </Form.Item>

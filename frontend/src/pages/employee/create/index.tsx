@@ -9,17 +9,15 @@ import {
   Input,
   Card,
   message,
-  Typography,
   DatePicker,
-  InputNumber,
   Select,
   Upload,
+  Image,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { UsersInterface } from "../../../interfaces/IUser";
 import { CreateUser } from "../../../services/https";
 import { useNavigate, Link } from "react-router-dom";
-import dayjs from "dayjs";
 import { RcFile } from "antd/es/upload/interface";
 
 const { Option } = Select;
@@ -43,17 +41,14 @@ function CreateEmployee() {
   };
 
   const onFinish = async (values: UsersInterface) => {
-    // Calculate the age using the birthday field
     const age = calculateAge(values.birthday ? values.birthday.toDate() : null);
-
-    // Create the payload with age and default role
     let payload = {
       ...values,
-      age: age, // Set the calculated age
-      roles: 1, // Set default role (can be changed dynamically if needed)
+      age: age,
+      picture: image, // เพิ่มรูปภาพลงใน payload
     };
 
-    console.log("Payload:", payload); // For debugging purposes
+    console.log("Payload:", payload);
 
     try {
       let res = await CreateUser(payload);
@@ -79,6 +74,24 @@ function CreateEmployee() {
         content: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
       });
     }
+  };
+
+  const handleImageUpload = (file: RcFile) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    return false; // Prevent the default upload behavior
+  };
+
+  const handleUpload = (file: RcFile) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result as string); // กำหนดรูปภาพที่อัพโหลด
+    };
+    reader.readAsDataURL(file);
+    return false; // ป้องกันไม่ให้มีการอัพโหลดอัตโนมัติ
   };
 
   return (
@@ -189,43 +202,101 @@ function CreateEmployee() {
                 <Input style={{ width: "100%", fontSize: "16px", borderRadius: "8px", border: "1px solid #003366" }} />
               </Form.Item>
             </Col>
-          </Row>
+            <Col xs={24} sm={24} md={24} lg={24} xl={12}>
+              <Form.Item
+                label={<span style={{ fontSize: "16px", color: "#003366", fontFamily: "Kanit, sans-serif" }}>รหัสผ่าน</span>}
+                name="password"
+                rules={[{ required: true, message: "กรุณากรอกรหัสผ่าน !" }]}
+              >
+                <Input.Password style={{ width: "100%", fontSize: "16px", borderRadius: "8px", border: "1px solid #003366" }} />
+              </Form.Item>
+            </Col>
 
-          <Row justify="end">
-            <Col style={{ marginTop: "40px" }}>
-              <Form.Item>
-                <Space>
-                  <Link to="/employee">
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item
+                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>รูปภาพ</span>}
+                name="picture"
+              >
+                <Upload
+                  customRequest={({ file, onSuccess }) => {
+                    handleImageUpload(file as RcFile);
+                    onSuccess?.();
+                  }}
+                  showUploadList={false}
+                >
+                  <Button
+                    style={{
+                      fontSize: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #003366',
+                      backgroundColor: '#003366',
+                      color: '#FFD700',
+                      transition: 'background-color 0.3s ease',
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#FFD700')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#003366')}
+                  >
+                    Upload
+                  </Button>
+                </Upload>
+              </Form.Item>
+              {image && (
+                <div style={{
+                  marginTop: '16px',
+                  textAlign: 'center',
+                  borderRadius: '8px',
+                  border: '1px solid #003366',
+                  overflow: 'hidden',
+                }}>
+                  <Image
+                    width={300}
+                    height={200}
+                    src={image}
+                    style={{
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                    }}
+                  />
+                </div>
+              )}
+            </Col>
+
+            <Row justify="end" style={{ marginTop: "150px", marginLeft: "350px"}}>
+              <Col >
+                <Form.Item>
+                  <Space>
+                    <Link to="/employee">
+                      <Button
+                        htmlType="button"
+                        style={{
+                          marginRight: "10px",
+                          fontSize: "16px",
+                          backgroundColor: "#FFD700",
+                          borderColor: "#FFD700",
+                          color: "#003366",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        ยกเลิก
+                      </Button>
+                    </Link>
                     <Button
-                      htmlType="button"
+                      type="primary"
+                      htmlType="submit"
+                      icon={<PlusOutlined />}
                       style={{
-                        marginRight: "10px",
                         fontSize: "16px",
-                        backgroundColor: "#FFD700",
-                        borderColor: "#FFD700",
-                        color: "#003366",
+                        backgroundColor: "#003366",
+                        borderColor: "#003366",
                         borderRadius: "8px",
                       }}
                     >
-                      ยกเลิก
+                      เพิ่มพนักงาน
                     </Button>
-                  </Link>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<PlusOutlined />}
-                    style={{
-                      fontSize: "16px",
-                      backgroundColor: "#003366",
-                      borderColor: "#003366",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    เพิ่มพนักงาน
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Col>
+                  </Space>
+                </Form.Item>
+              </Col>
+            </Row>
           </Row>
         </Form>
       </Card>

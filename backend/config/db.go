@@ -56,6 +56,8 @@ func SetupDatabase() {
 
        &entity.Rent{},
 
+       &entity.LeaveRequest{},
+
    )
 
 
@@ -72,14 +74,6 @@ func SetupDatabase() {
    hashedPassword, _ := HashPassword("123456")
 
    BirthDay, _ := time.Parse("2006-01-02", "1988-11-12")
-   AbDay, _ := time.Parse("2006-01-02", "2024-02-24")
-
-    Leave := &entity.LeaveRequest{
-
-        Day:  AbDay,
-
-        Description: "sick",
-    }
 
    User := &entity.Users{
 
@@ -140,10 +134,6 @@ func SetupDatabase() {
        Email: "admin@gmail.com",
 
    })
-
-   db.FirstOrCreate(&Leave, &entity.LeaveRequest{
-        Day:  AbDay,
-    })
 
    db.FirstOrCreate(&Cars, &entity.Cars{
         LicensePlate: "5กพ 9999",

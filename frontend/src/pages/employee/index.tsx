@@ -1,11 +1,40 @@
 import { useState, useEffect } from "react";
-import { Space, Table, Button, Col, Row, Divider, message } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Space, Table, Button, Modal, Col, Row, Divider, message, Typography } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, FieldTimeOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { GetUsers, DeleteUsersById } from "../../services/https/index";
 import { UsersInterface } from "../../interfaces/IUser";
 import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+
+const { Title } = Typography;
+
+const styles = {
+  container: {
+    width: '80%',
+    margin: '0 auto',
+    padding: '20px',
+    backgroundColor: '#FFFFFF',
+    border: '2px solid #003366',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+  headerTitle: {
+    fontSize: '36px',
+    fontFamily: 'Kanit, sans-serif',
+  },
+  addButton: {
+    fontSize: '16px',
+    backgroundColor: '#003366',
+    color: '#fff',
+    border: 'none',
+    fontFamily: 'Kanit, sans-serif',
+    marginBottom: '20px',
+  },
+  table: {
+    marginTop: '20px',
+  },
+};
 
 function EmployeePage() {
   const navigate = useNavigate();
@@ -13,22 +42,45 @@ function EmployeePage() {
   const [messageApi, contextHolder] = message.useMessage();
   const myId = localStorage.getItem("id") || ""; // Ensure myId is a string
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await GetUsers();
+      // Filter to show only Admin and Employee roles
+      const filteredUsers = response.filter(user => user.roles === 0 || user.roles === 2);
+      setUsers(filteredUsers);
+    } catch (error) {
+      if (error.response) {
+        message.error(`Error fetching users: ${error.response.data.message}`);
+      } else {
+        message.error('Network error. Please try again later.');
+      }
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    Modal.confirm({
+      title: 'Are you sure you want to Delete this Account?',
+      content: 'Once Deleted, this action cannot be undone.',
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'No, Cancel',
+      onOk: async () => {
+        try {
+          await DeleteUsersById(id);
+          message.success('Account deleted successfully');
+          fetchUsers();
+        } catch (error) {
+          message.error('Failed to Delete Account');
+        }
+      },
+    });
+  };
+
   const columns: ColumnsType<UsersInterface> = [
-    {
-      title: "",
-      render: (record) => (
-        <>
-          {myId !== record.ID && (
-            <Button
-              type="dashed"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => deleteUserById(record.ID)}
-            />
-          )}
-        </>
-      ),
-    },
     {
       title: "ตำแหน่ง",
       dataIndex: "roles",
@@ -79,75 +131,55 @@ function EmployeePage() {
     {
       title: "",
       render: (record) => (
-        <Button
-          type="primary"
-          icon={<EditOutlined />}
-          onClick={() => navigate(`/employee/edit/${record.ID}`)}
-        >
-          แก้ไขข้อมูล
-        </Button>
+        <Space>
+          <Button
+            style={{ border: '2px solid #003366', backgroundColor: '#003366', fontFamily: 'Kanit, sans-serif' }}
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/employee/edit/${record.ID}`)}
+          >
+            แก้ไข
+          </Button>
+          {myId !== record.ID && (
+            <Button
+              style={{ border: '2px solid #FF0000', backgroundColor: '#FF0000', color: '#ffffff', fontFamily: 'Kanit, sans-serif' }}
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record.ID)}
+            >
+              ลบ
+            </Button>
+          )}
+        </Space>
       ),
     },
   ];
 
-  const deleteUserById = async (id: number) => {
-    try {
-      let res = await DeleteUsersById(id);
-      if (res.status === 200) {
-        messageApi.open({
-          type: "success",
-          content: res.data.message,
-        });
-        await getUsers(); // Update the user list
-      } else {
-        messageApi.open({
-          type: "error",
-          content: res.data.error,
-        });
-      }
-    } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: "เกิดข้อผิดพลาดในการลบข้อมูล",
-      });
-    }
-  };
-
-  const getUsers = async () => {
-    try {
-      let res = await GetUsers();
-      if (res.length > 0) {
-        setUsers(res);
-      } else {
-        setUsers([]);
-      }
-    } catch (error) {
-      setUsers([]);
-      messageApi.open({
-        type: "error",
-        content: "เกิดข้อผิดพลาดในการดึงข้อมูล",
-      });
-    }
-  };
-
-  useEffect(() => {
-    getUsers();
-  }, []);
-
   return (
-    <>
+    <div style={styles.container}>
       {contextHolder}
 
       <Row justify="space-between" align="middle">
         <Col>
-          <h2>จัดการข้อมูลพนักงาน</h2>
+          <Title level={1} style={styles.headerTitle}>จัดการข้อมูลพนักงาน</Title>
         </Col>
 
         <Col>
           <Space>
-            <Link to="/employee/create" style={{ display: 'flex', alignItems: 'center', color: '#FFD700', fontFamily: 'Kanit, sans-serif' }}>
-              <Button type="primary" icon={<PlusOutlined />}>
-              <span>สร้างข้อมูล</span>
+            <Link to="/Leave" style={{ marginRight: 20, display: 'flex', alignItems: 'center' }}>
+              <Button type="primary" icon={<FieldTimeOutlined />} style={styles.addButton}>
+                <span>ลางาน</span>
+              </Button>
+            </Link>
+          </Space>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Space>
+            <Link to="/employee/create" style={{ marginRight: 20, display: 'flex', alignItems: 'center' }}>
+              <Button type="primary" icon={<PlusOutlined />} style={styles.addButton}>
+                <span>Create account</span>
               </Button>
             </Link>
           </Space>
@@ -156,7 +188,7 @@ function EmployeePage() {
 
       <Divider />
 
-      <div style={{ marginTop: 20 }}>
+      <div style={styles.table}>
         <Table
           rowKey="ID"
           columns={columns}
@@ -164,7 +196,7 @@ function EmployeePage() {
           style={{ width: "100%" }}
         />
       </div>
-    </>
+    </div>
   );
 }
 

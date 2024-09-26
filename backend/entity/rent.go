@@ -9,9 +9,9 @@ type Rent struct {
     gorm.Model
 
     Status         string      
-    StartRent time.Time 
-    EndRent   time.Time 
-     Price float32 `json:"price"`
+    StartRent time.Time `json:"start_rent"`
+    EndRent   time.Time `json:"end_rent"`
+    Price float32 `json:"price"`
     UserID   uint  `json:"user_id"`
     User     *Users  `gorm:"foreignKey: user_id" json:"user"`
 

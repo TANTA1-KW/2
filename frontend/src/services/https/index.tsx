@@ -3,6 +3,7 @@ import { SignInInterface } from "../../interfaces/SignIn";
 import { SignUpInterface } from "../../interfaces/SignUp";
 import { CarInterface } from "../../interfaces/ICar";
 import { RentInterface } from "../../interfaces/IRent";
+import { LeaveInterface } from "../../interfaces/ILeave";
 import axios from "axios";
 
 
@@ -115,16 +116,33 @@ async function UpdateUsersById(id: number, data: { status: string }) {
 
 
 async function CreateCar(data: CarInterface) {
-    const requestOptions: RequestInit = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `${Bearer} ${Authorization}`,
-        },
-        body: JSON.stringify(data),
+
+    const requestOptions = {
+   
+      method: "POST",
+   
+      headers: {
+   
+        "Content-Type": "application/json",
+   
+        Authorization: `${Bearer} ${Authorization}`,
+   
+      },
+   
+      body: JSON.stringify(data),
+   
     };
-    return fetchData(`${apiUrl}/addcar`, requestOptions);
-}
+   
+   
+    let res = await fetch(`${apiUrl}/addcar`, requestOptions).then((response) =>
+   
+      response.json()
+   
+    );
+   
+     return res;
+   
+   }
 
 async function GetCars() {
     const requestOptions: RequestInit = {
@@ -207,22 +225,29 @@ async function CreateRent (data: RentInterface)  {
     return response.json();  // Ensure this correctly parses JSON response
 };
 
-// service.ts
-async function UpdateRentById(id: number, data: { status: string }) {
-  const requestOptions: RequestInit = {
-      method: "PUT",
-      headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Authorization}`,
-      },
-      body: JSON.stringify(data),
-  };
-  return fetchData(`${apiUrl}/rent/${id}/status`, requestOptions);
+async function UpdateRentById(id: string, data: RentInterface) {
+    const requestOptions: RequestInit = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `${Bearer} ${Authorization}`,
+        },
+        body: JSON.stringify(data),
+    };
+    return fetchData(`${apiUrl}/rent/${id}`, requestOptions);
 }
-
-// service.ts
-
-// service.ts
+async function UpdateRentByIdStatus(id: number, data: { status: string }) {
+    const requestOptions: RequestInit = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+        body: JSON.stringify(data),
+    };
+    return fetchData(`${apiUrl}/rent/${id}/status`, requestOptions);
+  }
+  
 
 async function DeleteRentById(id: number) {
   const requestOptions: RequestInit = {
@@ -234,7 +259,67 @@ async function DeleteRentById(id: number) {
   };
   return fetchData(`${apiUrl}/rent/${id}`, requestOptions);
 }
+// service.ts
 
+
+async function GetLeaves() {
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+    };
+    return fetchData(`${apiUrl}/leaves`, requestOptions);
+}
+
+async function GetLeaveById(id: number) {
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+    };
+    return fetchData(`${apiUrl}/leave/${id}`, requestOptions);
+}
+
+async function CreateLeave(data: LeaveInterface) {
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+        body: JSON.stringify(data),
+    };
+
+    const response = await fetch(`${apiUrl}/leave`, requestOptions);
+    return response.json();
+}
+
+async function UpdateLeaveById(id: number, data: { status: string }) {
+    const requestOptions: RequestInit = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+        body: JSON.stringify(data),
+    };
+    return fetchData(`${apiUrl}/leave/${id}/status`, requestOptions);
+}
+
+async function DeleteLeaveById(id: number) {
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Authorization}`,
+        },
+    };
+    return fetchData(`${apiUrl}/leave/${id}`, requestOptions);
+}
 
 
 
@@ -253,11 +338,18 @@ export {
     CreateRent,
     UpdateRentById,
     DeleteRentById,
-
+    UpdateRentByIdStatus,
+    
     CreateUser,
     GetUsers,
     GetUsersById,
     UpdateUsersById,
     DeleteUsersById,
+
+    GetLeaves,
+    GetLeaveById,
+    CreateLeave,
+    UpdateLeaveById,
+    DeleteLeaveById,
 
 };

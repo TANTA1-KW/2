@@ -74,7 +74,7 @@ func Update(c *gin.Context) {
    }
 
 
-   c.JSON(http.StatusOK, gin.H{"message": "Updated successful"})
+   c.JSON(http.StatusOK, gin.H{"status": 200, "message": "Update successfully"})
 }
 
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GetCars } from "../../../services/https";
 import { CarInterface } from "../../../interfaces/ICar";
-import { Card, Row, Col, Typography, message, Select } from "antd";
+import { Card, Row, Col, Typography, Select, Alert } from "antd";
+import Loader from "../../../components/third-patry/Loader"; // Import Loader component
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -21,24 +22,24 @@ const styles = {
     border: '2px solid #003366',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to container
+    fontFamily: 'Kanit, sans-serif',
   },
   title: {
     fontSize: '36px',
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to title
+    fontFamily: 'Kanit, sans-serif',
     marginBottom: '20px',
   },
   select: {
     width: '100%',
     marginBottom: '20px',
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to select
+    fontFamily: 'Kanit, sans-serif',
   },
   card: {
     cursor: 'pointer',
     height: '100%',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to card
+    fontFamily: 'Kanit, sans-serif',
   },
   cardImage: {
     height: '180px',
@@ -46,76 +47,80 @@ const styles = {
   },
   cardDescription: {
     fontSize: '14px',
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to card description
+    fontFamily: 'Kanit, sans-serif',
   },
   cardMeta: {
-    fontFamily: 'Kanit, sans-serif', // Apply Kanit font to card meta
+    fontFamily: 'Kanit, sans-serif',
   },
 };
 
+// Utility function to add delay
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const CarType = () => {
-  const { type } = useParams<{ type: string }>(); // รับค่า type จาก URL
+  const { type } = useParams<{ type: string }>();
   const [cars, setCars] = useState<CarInterface[]>([]);
   const [filteredCars, setFilteredCars] = useState<CarInterface[]>([]);
   const [selectedProvince, setSelectedProvince] = useState<string | undefined>(undefined);
-  const [messageApi, contextHolder] = message.useMessage();
-  const navigate = useNavigate(); // ใช้ useNavigate สำหรับการนำทาง
+  const [isFetching, setIsFetching] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
+  const navigate = useNavigate();
 
   const getCarsByType = async () => {
+    if (isFetching) return;
+    setIsFetching(true);
+
     try {
-      const res = await GetCars(); // เรียก API เพื่อดึงข้อมูลรถยนต์
+      const [res] = await Promise.all([GetCars(), delay(1250)]); // Add delay of 1.25 seconds
       if (res.length > 0) {
-        // กรองข้อมูลตาม type ที่ส่งผ่าน URL และสถานะที่พร้อมใช้งาน
         const allCars = res.filter(car => 
           car.type === type &&
-          car.status === 'พร้อมใช้งาน' // กรองเฉพาะรถที่พร้อมใช้งาน
+          car.status === 'พร้อมใช้งาน'
         );
         setCars(allCars);
         setFilteredCars(allCars);
-
-        if (allCars.length === 0) {
-          messageApi.info(`ตอนนี้ไม่มีรถว่าง`); // แสดงข้อความเมื่อไม่พบข้อมูล
-        }
       } else {
         setCars([]);
         setFilteredCars([]);
-        messageApi.info("No cars available");
       }
     } catch (error) {
-      messageApi.error("Failed to fetch car data");
+      console.log("Error fetching cars");
+    } finally {
+      setLoading(false); // Stop loading after fetching data and delay
+      setIsFetching(false);
     }
   };
 
   useEffect(() => {
     if (type) {
-      getCarsByType(); // เรียก getCarsByType เมื่อ type มีค่า
+      getCarsByType();
     }
-  }, [type]); // เรียกใหม่เมื่อ type เปลี่ยน
+  }, [type]);
 
   useEffect(() => {
-    // กรองข้อมูลตามจังหวัดที่เลือก
     if (selectedProvince) {
       setFilteredCars(cars.filter(car => car.province === selectedProvince));
     } else {
       setFilteredCars(cars);
     }
-  }, [selectedProvince, cars]); // เรียกใหม่เมื่อ selectedProvince หรือ cars เปลี่ยน
+  }, [selectedProvince, cars]);
 
   const handleProvinceChange = (value: string) => {
-    setSelectedProvince(value); // เก็บค่าจังหวัดที่เลือก
+    setSelectedProvince(value);
   };
 
   const handleCardClick = (car: CarInterface) => {
-    // นำทางไปยังหน้าเลือกเวลาเพื่อทำการจองรถ
     navigate(`/rent/booking/${car.ID}`);
   };
 
+  if (loading) {
+    return <Loader />; // Display loader when loading is true
+  }
+
   return (
     <div style={styles.container}>
-      {contextHolder}
       <Title level={2} style={styles.title}>{type}</Title>
 
-      {/* Select Dropdown สำหรับเลือกจังหวัด */}
       <Select
         placeholder="เลือกจังหวัด"
         style={styles.select}
@@ -129,21 +134,29 @@ const CarType = () => {
         ))}
       </Select>
 
+      {filteredCars.length === 0 && (
+        <Alert
+          message="ไม่มีรถว่างในตอนนี้"
+          type="info"
+          showIcon
+        />
+      )}
+
       <Row gutter={16}>
         {filteredCars.map(car => (
           <Col xs={24} sm={12} md={8} lg={6} key={car.ID}>
             <Card
               cover={<img src={car.picture} alt={car.license_plate} style={styles.cardImage} />}
-              onClick={() => handleCardClick(car)} // เมื่อคลิกที่การ์ด
+              onClick={() => handleCardClick(car)}
               style={styles.card}
             >
               <Card.Meta
-                title={<Text style={styles.cardMeta}>{car.license_plate}</Text>} // แสดงเลขทะเบียนรถ
+                title={<Text style={styles.cardMeta}>{car.license_plate}</Text>}
                 description={
                   <div style={styles.cardDescription}>
                     <Text style={styles.cardMeta}>Brand: {car.brands}</Text><br />
                     <Text style={styles.cardMeta}>Model Year: {car.model_year}</Text><br />
-                    <Text style={styles.cardMeta}>Province: {car.province}</Text> {/* แสดงจังหวัด */}
+                    <Text style={styles.cardMeta}>Province: {car.province}</Text>
                   </div>
                 }
               />

@@ -38,7 +38,7 @@ type (
        GenderID  uint      `json:"gender_id"`
        Address   string    `json:"address"`
        Phone     string    `json:"phone"`
-       Picture      string  `json:"picture"`
+       Picture   string    `json:"picture"`
    }
 
 )

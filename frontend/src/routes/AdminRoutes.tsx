@@ -7,7 +7,10 @@ import FullLayout from '../layout/FullLayout';
 const MainPages = Loadable(lazy(() => import('../pages/authentication/Login')));
 const Dashboard = Loadable(lazy(() => import('../pages/home')));
 const Vehiclemanage = Loadable(lazy(() => import('../pages/vehiclemanage')));
+
 const ProfilePage = Loadable(lazy(() => import('../pages/profile')));
+const EditProfile = Loadable(lazy(() => import('../pages/profile/edit')));
+
 const CreateCar = Loadable(lazy(() => import('../pages/vehiclemanage/create')));
 const CarEdit = Loadable(lazy(() => import('../pages/vehiclemanage/edit')));
 const Rent = Loadable(lazy(() => import('../pages/carsearch')));
@@ -20,6 +23,13 @@ const EmployeePage = Loadable(lazy(() => import("../pages/employee")));
 const CreateEmployee = Loadable(lazy(() => import("../pages/employee/create")));
 const EditEmployee = Loadable(lazy(() => import("../pages/employee/edit")));
 
+const LeavePage = Loadable(lazy(() => import("../pages/Leave")));
+const CreateLeavePage = Loadable(lazy(() => import("../pages/Leave/create")));
+
+const LeavePageId = Loadable(lazy(() => import("../pages/profile/leave")))
+const CreateLeaves = Loadable(lazy(() => import("../pages/profile/leave/create")))
+
+// const
 const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
   return {
     path: '/',
@@ -48,7 +58,25 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
       },
       {
         path: '/profile',
-        element: <ProfilePage />,
+        children: [
+          {
+            path: '',
+            element: <ProfilePage />,            
+          },
+          {
+            path: 'edit/:id',
+            element: <EditProfile />,            
+          },
+          {
+            path: 'leave/create',
+            element: <CreateLeaves />,            
+          },
+          {
+            path: 'leave',
+            element: <LeavePageId />,            
+          },
+        ]
+
       },
       {
         path: '/employee', // Base route for employee-related views
@@ -92,6 +120,23 @@ const AdminRoutes = (isLoggedIn: boolean): RouteObject => {
         path: '/rentmanager',
         element: <ManageRentPage />,
       },
+      {
+        path: '/Leave',
+        children: [
+          {
+            path: '',
+            element: <LeavePage />,
+          },
+           {
+             path: "create",
+             element: <CreateLeavePage />,
+           },
+          // {
+          //   path: "edit/:id", // Dynamic route for editing specific employee
+          //   element: <EditLeave />,
+          // },
+        ]
+      }
     ],
   };
 };

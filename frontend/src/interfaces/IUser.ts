@@ -23,5 +23,7 @@ export interface UsersInterface {
    
     Roles?: number;
 
+    //LeaveRequestID?: number;
+    
     Picture?: string;
    }

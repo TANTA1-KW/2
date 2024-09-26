@@ -14,6 +14,7 @@ import {
   InputNumber,
   Select,
   Upload,
+  Image,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { UsersInterface } from "../../../interfaces/IUser";
@@ -32,6 +33,18 @@ function EditEmployee() {
   const [form] = Form.useForm();
   const [image, setImage] = useState<string | undefined>();
 
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return 0;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const getUserById = async (id: string) => {
     try {
       const res = await GetUsersById(id);
@@ -46,7 +59,6 @@ function EditEmployee() {
           gender_id: res.gender?.ID,
           address: res.address,
           phone: res.phone,
-          picture: res.picture, // Add picture field if needed
         });
         setImage(res.picture); // Set the image if available
       } else {
@@ -68,9 +80,10 @@ function EditEmployee() {
   };
 
   const onFinish = async (values: UsersInterface) => {
-    let payload = {
+    const age = calculateAge(values.birthday ? values.birthday.toDate() : null);
+    const payload = {
       ...values,
-      price: parseFloat(values.price || "0"), // Example for price
+      age: age,
       picture: image, // Use the base64 image if available
     };
 
@@ -87,7 +100,7 @@ function EditEmployee() {
       } else {
         messageApi.open({
           type: "error",
-          content: `เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${res.error}`, // More detailed error message
+          content: `เกิดข้อผิดพลาดในการบันทึกข้อมูล: ${res.error}`,
         });
       }
     } catch (error) {
@@ -119,31 +132,30 @@ function EditEmployee() {
         fontFamily: "Kanit, sans-serif",
         padding: "20px",
         width: "80%",
-        margin: "0 auto", // Center the component
+        margin: "0 auto",
       }}
     >
       {contextHolder}
       <Card>
         <Title level={2} style={{ fontSize: "24px", color: "#003366", fontFamily: "Kanit, sans-serif" }}>
-          แก้ไขข้อมูลผู้ดูแลระบบ
+          แก้ไขข้อมูลพนักงาน
         </Title>
         <Divider />
-        <Row justify="center">
+        <Row justify="center" style={{ marginBottom: '20px' }}>
           <Col>
             {image && (
-              <div
-                style={{
-                  width: "300px",
-                  height: "200px",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid #003366",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div style={{
+                width: "200px",
+                height: "200px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "1px solid #003366",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#f0f0f0",
+              }}>
                 <img
                   src={image}
                   alt="User"
@@ -178,31 +190,15 @@ function EditEmployee() {
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
-            <Form.Item
-  label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ตำแหน่ง</span>}
-  name="roles"
-  rules={[{ required: true, message: "กรุณากรอกตำแหน่ง!" }]}
->
-  <Select
-    style={{ width: "100%", fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }}
-  >
-    <Option value={0}>Admin</Option>
-    <Option value={2}>Employee</Option>
-  </Select>
-</Form.Item>
-
-            </Col>
-            <Col xs={24} sm={24} md={12}>
               <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>อายุ</span>}
-                name="age"
-                rules={[{ required: true, message: "กรุณากรอกอายุ!" }]}
+                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ตำแหน่ง</span>}
+                name="roles"
+                rules={[{ required: true, message: "กรุณากรอกตำแหน่ง!" }]}
               >
-                <InputNumber
-                  min={0}
-                  max={99}
-                  style={{ width: "100%", fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }}
-                />
+                <Select style={{ width: "100%", fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }}>
+                  <Option value={0}>Admin</Option>
+                  <Option value={2}>Employee</Option>
+                </Select>
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
@@ -220,24 +216,10 @@ function EditEmployee() {
                 name="gender_id"
                 rules={[{ required: true, message: "กรุณาเลือกเพศ!" }]}
               >
-                <Select
-                  style={{ width: "100%", fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }}
-                >
-                  <Option value="1">Male</Option>
-                  <Option value="2">Female</Option>
+                <Select style={{ width: "100%", fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }}>
+                  <Option value={1}>ชาย</Option>
+                  <Option value={2}>หญิง</Option>
                 </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={24} md={12}>
-              <Form.Item
-                label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>อีเมล</span>}
-                name="email"
-                rules={[
-                  { type: "email", message: "กรุณากรอกอีเมลที่ถูกต้อง!" },
-                  { required: true, message: "กรุณากรอกอีเมล!" }
-                ]}
-              >
-                <Input style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={12}>
@@ -253,48 +235,29 @@ function EditEmployee() {
               <Form.Item
                 label={<span style={{ fontSize: '16px', color: '#003366', fontFamily: 'Kanit, sans-serif' }}>ที่อยู่</span>}
                 name="address"
+                rules={[{ required: true, message: "กรุณากรอกที่อยู่!" }]}
               >
                 <Input.TextArea style={{ fontSize: '16px', borderRadius: '8px', border: '1px solid #003366' }} />
               </Form.Item>
             </Col>
-
-          </Row>
-          <Row justify="end">
-            <Col style={{ marginTop: "40px" }}>
-              <Form.Item>
-                <Space>
-                  <Link to="/employee">
-                    <Button
-                      htmlType="button"
-                      style={{
-                        marginRight: "10px",
-                        fontSize: "16px",
-                        backgroundColor: "#FFD700",
-                        borderColor: "#FFD700",
-                        color: "#003366",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </Link>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<PlusOutlined />}
-                    style={{
-                      fontSize: "16px",
-                      borderRadius: "8px",
-                      backgroundColor: "#003366",
-                      borderColor: "#003366",
-                    }}
-                  >
-                    Save
-                  </Button>
-                </Space>
+            <Col xs={24} sm={24} md={12}>
+              <Form.Item label="อัพโหลดรูปภาพ">
+                <Upload beforeUpload={handleImageUpload} showUploadList={false}>
+                  <Button icon={<PlusOutlined />}>Upload</Button>
+                </Upload>
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item>
+            <Space size="large" style={{ marginTop: '20px' }}>
+              <Button type="primary" htmlType="submit" style={{ backgroundColor: "#003366", borderColor: "#003366" }}>
+                บันทึก
+              </Button>
+              <Button type="default" onClick={() => navigate("/employee")}>
+                ยกเลิก
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Card>
     </div>

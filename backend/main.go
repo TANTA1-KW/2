@@ -10,9 +10,8 @@ import (
     "github.com/gtwndtl/projectsa/controller/rent"
     "github.com/gtwndtl/projectsa/controller/genders"
     "github.com/gtwndtl/projectsa/controller/users"
-    "github.com/gtwndtl/projectsa/middlewares"
-
     "github.com/gtwndtl/projectsa/controller/Leave"
+    "github.com/gtwndtl/projectsa/middlewares"
 )
 
 const defaultPort = "8000"
@@ -36,7 +35,7 @@ func main() {
     r.POST("/signin", users.SignIn)
     r.POST("/addcar", cars.AddCar)
     r.POST("/addrent", rent.AddRent)
-
+    r.POST("/leave", Leave.AddLeaveRequest)
     router := r.Group("/")
     {
         router.Use(middlewares.Authorizes())
@@ -59,13 +58,17 @@ func main() {
         router.GET("/rent", rent.GetAll)
         router.GET("/rent/:id", rent.Get)
         router.DELETE("/rent/:id", rent.Delete)
+        
+        // Leave routes
+        router.PUT("/leave/:id/status", Leave.UpdateLeaveStatus)
+        router.PUT("/leave/:id", Leave.UpdateLeaveRequest)
+        router.GET("/leaves", Leave.GetAllLeaveRequests)
+        router.GET("/leave/:id", Leave.GetLeaveRequest)
+        router.DELETE("/leave/:id", Leave.DeleteLeaveRequest)
     }
 
-    r.POST("/leave-request", Leave.AddLeaveRequest)
-    r.GET("/leave-requests", Leave.GetAllLeaveRequests)
-    r.GET("/leave-request/:id", Leave.GetLeaveRequest)
-    r.PUT("/leave-request/:id", Leave.UpdateLeaveRequest)
-    r.DELETE("/leave-request/:id", Leave.DeleteLeaveRequest)
+
+
     // Gender route
     r.GET("/genders", genders.GetAll)
 

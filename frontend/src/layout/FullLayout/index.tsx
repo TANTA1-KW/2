@@ -13,11 +13,20 @@ import CarCreate from "../../pages/vehiclemanage/create";
 import CarEdit from "../../pages/vehiclemanage/edit";
 import ProfilePage from "../../pages/profile";
 import RentManager from "../../pages/rentmanage";
+
 import EmployeePage from "../../pages/employee";
 import CreateEmployee from"../../pages/employee/create";
 import EditEmployee from"../../pages/employee/edit";
+
+import LeavePage from "../../pages/Leave";
+import CreateLeavePage from "../../pages/Leave/create";
+
+import CreateLeaves from "../../pages/profile/leave/create";
+import EditProfile from "../../pages/profile/edit";
+
 import { GetUsers } from "../../services/https";
 import Loader from "../../components/third-patry/Loader"; 
+import LeavePageId from "../../pages/profile/leave";
 
 const { Header, Content, Footer } = Layout;
 
@@ -105,7 +114,7 @@ const FullLayout: React.FC = () => {
         <UserOutlined style={{ marginRight: '8px', color: '#FFD700' }} />
         Profile
       </Menu.Item>
-      {roles !== 1 && (
+      {roles === 0 && (
       <Menu.Item
         key="employee"
         style={{ 
@@ -295,6 +304,12 @@ const FullLayout: React.FC = () => {
                 <Route path="/employee/edit/:id" element={<EditEmployee />} />
                 <Route path="/employee/create" element={<CreateEmployee />} />
                 <Route path="/rentmanager" element={<RentManager />} /> {/* Add this line */}
+                <Route path="/Leave" element={<LeavePage />} />
+                <Route path="/Leave/create" element={<CreateLeavePage />} />
+                <Route path="/profile/edit/:id" element={<EditProfile />} />
+                <Route path="/profile/Leave" element={<LeavePageId />} />
+                <Route path="/profile/Leave/create" element={<CreateLeaves />} />
+
               </Routes>
             </div>
           </Content>

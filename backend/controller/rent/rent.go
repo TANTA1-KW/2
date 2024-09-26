@@ -62,18 +62,18 @@ func Update(c *gin.Context) {
     result = db.Save(&rent)
 
     if result.Error != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"status": 400, "message": "Bad request"})
+        c.JSON(http.StatusBadRequest, gin.H{"status": 400, "message": "Failed to update rent record"})
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"status": 200, "message": "Updated successful"})
+    c.JSON(http.StatusOK, gin.H{"status": 200, "message": "Updated successfully"})
 }
 
+// Delete removes a rent record by ID
 func Delete(c *gin.Context) {
     id := c.Param("id")
 
     db := config.DB()
-    // Perform the delete operation directly without using soft delete
     if tx := db.Exec("DELETE FROM rents WHERE id = ?", id); tx.RowsAffected == 0 {
         c.JSON(http.StatusBadRequest, gin.H{"status": 400, "error": "id not found"})
         return
