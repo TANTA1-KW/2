@@ -148,8 +148,8 @@ const styles = {
   },
   statusBadge: {
     position: 'absolute',
-    top: '16px',
-    right: '16px',
+    top: '2px',
+    right: '2px',
     width: '16px',
     height: '16px',
     borderRadius: '50%',
